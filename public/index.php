@@ -12,6 +12,7 @@ $app = new \Slim\App;
 require '../src/rutas/productos.php';
 require '../src/rutas/tienda_online.php';
 
+
 $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response
