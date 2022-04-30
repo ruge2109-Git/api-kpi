@@ -11,6 +11,9 @@ $app = new \Slim\App;
 $app->get('/',function(Request $request,Response $response){
     echo "HOLA API";
 });
+$app->get('/api',function(Request $request,Response $response){
+    echo "HOLA API 2";
+});
 // RUTA PRODUCTOS
 // require '../src/rutas/productos.php';
 // require '../src/rutas/tienda_online.php';
