@@ -21,3 +21,4 @@ $app->add(function ($req, $res, $next) {
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 });
 $app->run();
+echo "HOLA MUNDOI";
