@@ -190,6 +190,30 @@ $app->get('/api/tienda/recargas',function (Request $request, Response $response)
     echo json_encode($data);
 });
 
+$app->get('/api/tienda/recargasFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+    $data = ["bRta"=>false];
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $sql = "SELECT 
+            usuario_vendedor administrador, 
+            usuario_cliente cliente, 
+            saldo_adicional valor_recarga, 
+            fecha_transaccion fecha_recarga 
+        from 
+            tienda_streaming 
+        where 
+            descripcion= 'Recarga directa por el Administrador' and
+            fecha_transaccion between '$fechaInicio' and '$fechaFin'
+        order by saldo_adicional desc, fecha_recarga desc
+    ";
+    $dataConsulta = getSelect($sql);
+    if($dataConsulta['bRta']){
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
 $app->get('/api/tienda/recargasTotalizado',function (Request $request, Response $response){
     $data = ["bRta"=>false];
     $sql = "SELECT 
@@ -201,6 +225,32 @@ $app->get('/api/tienda/recargasTotalizado',function (Request $request, Response 
             descripcion= 'Recarga directa por el Administrador'
         group by fecha_transaccion
         order by valor_recarga desc, fecha_recarga desc
+    ";
+    $dataConsulta = getSelect($sql);
+    if($dataConsulta['bRta']){
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
+$app->get('/api/tienda/recargasTotalizadoFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+    $data = ["bRta"=>false];
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $sql = "SELECT 
+            fecha_transaccion fecha_recarga ,
+            sum(saldo_adicional) valor_recarga
+        from 
+            tienda_streaming 
+        where 
+            descripcion= 'Recarga directa por el Administrador' and
+            fecha_transaccion between '$fechaInicio' and '$fechaFin'
+        group by 
+            fecha_transaccion
+        order by 
+            valor_recarga desc, 
+            fecha_recarga desc;
     ";
     $dataConsulta = getSelect($sql);
     if($dataConsulta['bRta']){
@@ -321,6 +371,117 @@ $app->get('/api/tienda/detalleVenta/{persona}/{producto}',function (Request $req
 
     echo json_encode($data);
 });
+
+$app->get('/api/tienda/ventasProducto',function (Request $request, Response $response){
+
+    $data = ["bRta"=>false];
+    $sql = "SELECT 
+            producto nombre_producto, 
+            count(*) cantidad,
+            sum(ts.saldo_adicional) total_venta,
+            ts.fecha_transaccion
+        from 
+            tienda_streaming ts
+        where
+            ts.descripcion = 'Venta de Producto'
+        group by 
+            producto,
+            ts.fecha_transaccion
+        order by cantidad desc";
+
+    $dataConsulta = getSelect($sql);
+    if($dataConsulta['bRta']){
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
+});
+
+$app->get('/api/tienda/ventasProductoFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+    $data = ["bRta"=>false];
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $sql = "SELECT 
+            producto nombre_producto, 
+            count(*) cantidad,
+            sum(ts.saldo_adicional) total_venta,
+            ts.fecha_transaccion
+        from 
+            tienda_streaming ts
+        where
+            ts.descripcion = 'Venta de Producto' and
+            fecha_transaccion between '$fechaInicio' and '$fechaFin'
+        group by 
+            producto,
+            ts.fecha_transaccion
+        order by cantidad desc";
+
+    $dataConsulta = getSelect($sql);
+    if($dataConsulta['bRta']){
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
+});
+
+$app->get('/api/tienda/ventasPersona',function (Request $request, Response $response){
+
+    $data = ["bRta"=>false];
+    $sql = "SELECT 
+            ts.usuario_vendedor nombre_persona, 
+            count(*) cantidad,
+            sum(ts.saldo_adicional) total_venta,
+            ts.fecha_transaccion
+        from 
+            tienda_streaming ts
+        where
+            ts.descripcion = 'Venta de Producto'
+        group by 
+            ts.usuario_vendedor,
+            ts.fecha_transaccion
+        order by cantidad desc";
+
+    $dataConsulta = getSelect($sql);
+    if($dataConsulta['bRta']){
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
+});
+
+$app->get('/api/tienda/ventasPersonaFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+
+    $data = ["bRta"=>false];
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $sql = "SELECT 
+            ts.usuario_vendedor nombre_persona, 
+            count(*) cantidad,
+            sum(ts.saldo_adicional) total_venta,
+            ts.fecha_transaccion
+        from 
+            tienda_streaming ts
+        where
+            ts.descripcion = 'Venta de Producto' and
+            fecha_transaccion between '$fechaInicio' and '$fechaFin'
+        group by 
+            ts.usuario_vendedor,
+            ts.fecha_transaccion
+        order by cantidad desc";
+
+    $dataConsulta = getSelect($sql);
+    if($dataConsulta['bRta']){
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
+});
+
+
 
 function getSelect(String $sql)
 {
