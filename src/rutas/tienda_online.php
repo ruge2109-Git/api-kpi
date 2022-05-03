@@ -145,33 +145,34 @@ function buscarMovimientoPorIdTransaccion(String $idTransaccion)
 
 //Indicadores y consultas de gestión
 $app->get('/api/tienda/indicadores', function (Request $request, Response $response) {
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $sqlVentaProducto = "select count(*) cantidad, sum(saldo_adicional) total,'Ventas' titulo from tienda_streaming where descripcion= 'Venta de Producto'";
     $sqlComisionVenta = "select count(*) cantidad, sum(saldo_adicional) total,'Comisiones' titulo from tienda_streaming where descripcion= 'Comision venta por'";
     $sqlRecargaDirecta = "select count(*) cantidad, sum(saldo_adicional) total,'Recargas' titulo from tienda_streaming where descripcion= 'Recarga directa por el Administrador'";
-    
+
     $dataVenta = getSelect($sqlVentaProducto);
-    if($dataVenta['bRta']){
+    if ($dataVenta['bRta']) {
         $data['data'][] = $dataVenta['data'][0];
     }
     $dataVenta = getSelect($sqlComisionVenta);
-    if($dataVenta['bRta']){
+    if ($dataVenta['bRta']) {
         $data['data'][] = $dataVenta['data'][0];
     }
     $dataVenta = getSelect($sqlRecargaDirecta);
-    if($dataVenta['bRta']){
+    if ($dataVenta['bRta']) {
         $data['data'][] = $dataVenta['data'][0];
     }
-    if(isset($data['data']) ){
+    if (isset($data['data'])) {
         $data['bRta'] = true;
     }
 
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/recargas',function (Request $request, Response $response){
-    $data = ["bRta"=>false];
+$app->get('/api/tienda/recargas', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
     $sql = "SELECT 
+            cod_tienda_streaming,
             usuario_vendedor administrador, 
             usuario_cliente cliente, 
             saldo_adicional valor_recarga, 
@@ -184,15 +185,15 @@ $app->get('/api/tienda/recargas',function (Request $request, Response $response)
         order by saldo_adicional desc, fecha_recarga desc
     ";
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/recargasFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
-    $data = ["bRta"=>false];
+$app->get('/api/tienda/recargasFiltro/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
     $sql = "SELECT 
@@ -208,15 +209,15 @@ $app->get('/api/tienda/recargasFiltro/{fechaInicio}/{fechaFin}',function (Reques
         order by saldo_adicional desc, fecha_recarga desc
     ";
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/recargasTotalizado',function (Request $request, Response $response){
-    $data = ["bRta"=>false];
+$app->get('/api/tienda/recargasTotalizado', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
     $sql = "SELECT 
             fecha_transaccion fecha_recarga ,
             sum(saldo_adicional) valor_recarga
@@ -228,15 +229,15 @@ $app->get('/api/tienda/recargasTotalizado',function (Request $request, Response 
         order by valor_recarga desc, fecha_recarga desc
     ";
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/recargasTotalizadoFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
-    $data = ["bRta"=>false];
+$app->get('/api/tienda/recargasTotalizadoFiltro/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
     $sql = "SELECT 
@@ -254,20 +255,20 @@ $app->get('/api/tienda/recargasTotalizadoFiltro/{fechaInicio}/{fechaFin}',functi
             fecha_recarga desc;
     ";
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/detalleRecarga/{persona}/{fecha}',function (Request $request, Response $response){
+$app->get('/api/tienda/detalleRecarga/{persona}/{fecha}', function (Request $request, Response $response) {
 
     $persona = $request->getAttribute('persona');
     $fecha = $request->getAttribute('fecha');
 
-    
-    $data = ["bRta"=>false];
+
+    $data = ["bRta" => false];
     $sql = "SELECT 
             ts.producto,
             ts.usuario_vendedor persona,
@@ -290,19 +291,19 @@ $app->get('/api/tienda/detalleRecarga/{persona}/{fecha}',function (Request $requ
             recargante.recarga
     ";
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/ventasPersonaProducto/{persona}/{producto}',function (Request $request, Response $response){
+$app->get('/api/tienda/ventasPersonaProducto/{persona}/{producto}', function (Request $request, Response $response) {
     $persona = base64_decode($request->getAttribute('persona'));
     $producto = base64_decode($request->getAttribute('producto'));
 
-    
-    $data = ["bRta"=>false];
+
+    $data = ["bRta" => false];
     $sql = "SELECT
         ts.usuario_vendedor nombre_persona,
         ts.producto nombre_producto,
@@ -319,21 +320,21 @@ $app->get('/api/tienda/ventasPersonaProducto/{persona}/{producto}',function (Req
         ts.descripcion = 'Venta de Producto'
     ";
 
-    if($persona!='None'){
-        $sql.= " AND ts.usuario_vendedor = '$persona'";
+    if ($persona != 'None') {
+        $sql .= " AND ts.usuario_vendedor = '$persona'";
     }
-    if($producto!='None'){
-        $sql.= " AND ts.producto = '$producto'";
+    if ($producto != 'None') {
+        $sql .= " AND ts.producto = '$producto'";
     }
-    
-    $sql.= " GROUP BY 
+
+    $sql .= " GROUP BY 
         ts.usuario_vendedor ,
         ts.producto ,
         ts.fecha_transaccion
         order by cantidad_ventas desc";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -341,13 +342,13 @@ $app->get('/api/tienda/ventasPersonaProducto/{persona}/{producto}',function (Req
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/ventasPersonaProductoFiltro/{persona}/{producto}/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+$app->get('/api/tienda/ventasPersonaProductoFiltro/{persona}/{producto}/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
     $persona = base64_decode($request->getAttribute('persona'));
     $producto = base64_decode($request->getAttribute('producto'));
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
-    
-    $data = ["bRta"=>false];
+
+    $data = ["bRta" => false];
     $sql = "SELECT
         ts.usuario_vendedor nombre_persona,
         ts.producto nombre_producto,
@@ -364,21 +365,21 @@ $app->get('/api/tienda/ventasPersonaProductoFiltro/{persona}/{producto}/{fechaIn
         ts.descripcion = 'Venta de Producto'
     ";
 
-    if($persona!='None'){
-        $sql.= " AND ts.usuario_vendedor = '$persona' ";
+    if ($persona != 'None') {
+        $sql .= " AND ts.usuario_vendedor = '$persona' ";
     }
-    if($producto!='None'){
-        $sql.= " AND ts.producto = '$producto' ";
+    if ($producto != 'None') {
+        $sql .= " AND ts.producto = '$producto' ";
     }
-    
-    $sql.= "AND ts.fecha_transaccion between '$fechaInicio' and '$fechaFin' GROUP BY 
+
+    $sql .= "AND ts.fecha_transaccion between '$fechaInicio' and '$fechaFin' GROUP BY 
         ts.usuario_vendedor ,
         ts.producto ,
         ts.fecha_transaccion
         order by cantidad_ventas desc";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -386,11 +387,11 @@ $app->get('/api/tienda/ventasPersonaProductoFiltro/{persona}/{producto}/{fechaIn
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/detalleVenta/{persona}/{producto}',function (Request $request, Response $response){
+$app->get('/api/tienda/detalleVenta/{persona}/{producto}', function (Request $request, Response $response) {
     $persona = base64_decode($request->getAttribute('persona'));
     $producto = base64_decode($request->getAttribute('producto'));
 
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $sql = "SELECT
         ts.id_transaccion,
         ts.usuario_vendedor,
@@ -412,7 +413,7 @@ $app->get('/api/tienda/detalleVenta/{persona}/{producto}',function (Request $req
         ts.id_transaccion";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -420,12 +421,12 @@ $app->get('/api/tienda/detalleVenta/{persona}/{producto}',function (Request $req
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/detalleVentaFiltro/{persona}/{producto}/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+$app->get('/api/tienda/detalleVentaFiltro/{persona}/{producto}/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
     $persona = base64_decode($request->getAttribute('persona'));
     $producto = base64_decode($request->getAttribute('producto'));
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $sql = "SELECT
         ts.id_transaccion,
         ts.usuario_vendedor,
@@ -448,7 +449,7 @@ $app->get('/api/tienda/detalleVentaFiltro/{persona}/{producto}/{fechaInicio}/{fe
         ts.id_transaccion";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -456,9 +457,9 @@ $app->get('/api/tienda/detalleVentaFiltro/{persona}/{producto}/{fechaInicio}/{fe
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/ventasProducto',function (Request $request, Response $response){
+$app->get('/api/tienda/ventasProducto', function (Request $request, Response $response) {
 
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $sql = "SELECT 
             producto nombre_producto, 
             count(*) cantidad,
@@ -474,7 +475,7 @@ $app->get('/api/tienda/ventasProducto',function (Request $request, Response $res
         order by cantidad desc";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -482,8 +483,8 @@ $app->get('/api/tienda/ventasProducto',function (Request $request, Response $res
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/ventasProductoFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
-    $data = ["bRta"=>false];
+$app->get('/api/tienda/ventasProductoFiltro/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
     $sql = "SELECT 
@@ -502,7 +503,7 @@ $app->get('/api/tienda/ventasProductoFiltro/{fechaInicio}/{fechaFin}',function (
         order by cantidad desc";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -510,9 +511,9 @@ $app->get('/api/tienda/ventasProductoFiltro/{fechaInicio}/{fechaFin}',function (
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/ventasPersona',function (Request $request, Response $response){
+$app->get('/api/tienda/ventasPersona', function (Request $request, Response $response) {
 
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $sql = "SELECT 
             ts.usuario_vendedor nombre_persona, 
             count(*) cantidad,
@@ -528,7 +529,7 @@ $app->get('/api/tienda/ventasPersona',function (Request $request, Response $resp
         order by cantidad desc";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -536,9 +537,9 @@ $app->get('/api/tienda/ventasPersona',function (Request $request, Response $resp
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/ventasPersonaFiltro/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+$app->get('/api/tienda/ventasPersonaFiltro/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
 
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
     $sql = "SELECT 
@@ -557,7 +558,7 @@ $app->get('/api/tienda/ventasPersonaFiltro/{fechaInicio}/{fechaFin}',function (R
         order by cantidad desc";
 
     $dataConsulta = getSelect($sql);
-    if($dataConsulta['bRta']){
+    if ($dataConsulta['bRta']) {
         $data['bRta'] = true;
         $data['data'] = $dataConsulta['data'];
     }
@@ -565,9 +566,9 @@ $app->get('/api/tienda/ventasPersonaFiltro/{fechaInicio}/{fechaFin}',function (R
     echo json_encode($data);
 });
 
-$app->get('/api/tienda/comisionesPorPersona/{persona}',function (Request $request, Response $response){
+$app->get('/api/tienda/comisionesPorPersona/{persona}', function (Request $request, Response $response) {
     $persona = base64_decode($request->getAttribute('persona'));
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $sql = "SELECT
             dat.usuario_vendedor,
             dat.producto,
@@ -588,20 +589,20 @@ $app->get('/api/tienda/comisionesPorPersona/{persona}',function (Request $reques
                     usuario_vendedor = '$persona'
                 group by id_transaccion,producto,fecha_transaccion
             ) dat";
-     $dataConsulta = getSelect($sql);
-     if($dataConsulta['bRta']){
-         $data['bRta'] = true;
-         $data['data'] = $dataConsulta['data'];
-     }
- 
-     echo json_encode($data);
+    $dataConsulta = getSelect($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
 });
 
-$app->get('/api/tienda/comisionesPorPersona/{persona}/{fechaInicio}/{fechaFin}',function (Request $request, Response $response){
+$app->get('/api/tienda/comisionesPorPersona/{persona}/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
     $persona = base64_decode($request->getAttribute('persona'));
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
-    $data = ["bRta"=>false];
+    $data = ["bRta" => false];
     $sql = "SELECT
             dat.usuario_vendedor,
             dat.producto,
@@ -623,15 +624,80 @@ $app->get('/api/tienda/comisionesPorPersona/{persona}/{fechaInicio}/{fechaFin}',
                     fecha_transaccion between '$fechaInicio' and '$fechaFin'
                 group by id_transaccion,producto,fecha_transaccion
             ) dat";
-     $dataConsulta = getSelect($sql);
-     if($dataConsulta['bRta']){
-         $data['bRta'] = true;
-         $data['data'] = $dataConsulta['data'];
-     }
- 
-     echo json_encode($data);
+    $dataConsulta = getSelect($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
 });
 
+$app->post('/api/tienda/saveArchivo', function (Request $request, Response $response) {
+    $payload = $request->getBody()->__toString();
+    $payload =  stripslashes($payload);
+    $data = json_decode($payload, true);
+
+    $cod_tienda_streaming = $data["cod_tienda_streaming"];
+    $banco = $data["banco"];
+    $cuenta = $data["cuenta"];
+    $fecha = $data["fecha"];
+    $hora = $data["hora"];
+    $nombre_archivo = $data["nombre_archivo"];
+    $numero_comprobante = $data["numero_comprobante"];
+    $valor = $data["valor"];
+    $archivo = $data["archivo"];
+
+
+    $sql = "INSERT INTO transaccion (cod_tienda_streaming, banco, cuenta, valor, fecha, hora, numero_comprobante, archivo, nombre_archivo) VALUES (
+        :cod_tienda_streaming,
+        :banco,
+        :cuenta,
+        :valor,
+        :fecha,
+        :hora,
+        :numero_comprobante,
+        :archivo,
+        :nombre_archivo
+    )";
+    $codProducto = buscarArchivoPorNumComprobante($numero_comprobante);
+    if ($codProducto["bRta"]) {
+        $data = [
+            "bRta" => false,
+            "mSmg" => "Ya existe un archivo con ese número de transacción"
+        ];
+        echo json_encode($data);
+        return;
+    }
+    try {
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->prepare($sql);
+        $resultado->bindParam(':cod_tienda_streaming', $cod_tienda_streaming);
+        $resultado->bindParam(':banco', $banco);
+        $resultado->bindParam(':cuenta', $cuenta);
+        $resultado->bindParam(':fecha', $fecha);
+        $resultado->bindParam(':hora', $hora);
+        $resultado->bindParam(':nombre_archivo', $nombre_archivo);
+        $resultado->bindParam(':valor', $valor);
+        $resultado->bindParam(':numero_comprobante', $numero_comprobante);
+        $resultado->bindParam(':archivo', $archivo);
+        $resultado->execute();
+
+        $data = [
+            "bRta" => true
+        ];
+        $resultado = null;
+        $db = null;
+        echo json_encode($data);
+    } catch (PDOException $e) {
+        $data =  [
+            "bRta" => false,
+            "mSmg" => "Error de conexión: " . $e->getMessage()
+        ];
+        echo json_encode($data);
+    }
+});
 
 function getSelect(String $sql)
 {
@@ -647,11 +713,42 @@ function getSelect(String $sql)
         $dataDB = $resultado->fetchAll(PDO::FETCH_OBJ);
 
         $data = ["bRta" => true, "data" => $dataDB];
-        
+
         $resultado = null;
         $db = null;
         return $data;
     } catch (PDOException $e) {
         return  ["bRta" => false, "mSmg" => "Error de conexión"];
+    }
+}
+
+function buscarArchivoPorNumComprobante(String $idTransaccion)
+{
+    $sql = "select * from transaccion where numero_comprobante = $idTransaccion";
+    try {
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if ($resultado->rowCount() <= 0) {
+            $data =  [
+                "bRta" => false
+            ];
+            return $data;
+        }
+        $dataR = $resultado->fetchAll(PDO::FETCH_OBJ);
+        $dataN = json_decode(json_encode($dataR[0]), true);
+        $data =  [
+            "bRta" => true,
+            "mSmg" => $dataN['cod_tienda_streaming']
+        ];
+        $resultado = null;
+        $db = null;
+        return $data;
+    } catch (PDOException $e) {
+        $data =  [
+            "bRta" => false,
+            "mSmg" => $e->getMessage()
+        ];
+        return $data;
     }
 }
