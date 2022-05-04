@@ -633,6 +633,47 @@ $app->get('/api/tienda/comisionesPorPersona/{persona}/{fechaInicio}/{fechaFin}',
     echo json_encode($data);
 });
 
+$app->get('/api/tienda/archivosPorRecarga/{codTiendaStreaming}', function (Request $request, Response $response) {
+    $codTiendaStreaming = base64_decode($request->getAttribute('codTiendaStreaming'));
+    $data = ["bRta" => false];
+    $sql = "SELECT 
+            *
+        from 
+            transaccion 
+        where 
+            cod_tienda_streaming=$codTiendaStreaming";
+    $dataConsulta = getSelect($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
+});
+
+$app->get('/api/tienda/archivosPorRecargaFiltro/{codTiendaStreaming}/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $codTiendaStreaming = base64_decode($request->getAttribute('codTiendaStreaming'));
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $data = ["bRta" => false];
+    $sql = "SELECT 
+                *
+            from 
+                transaccion 
+            where 
+                cod_tienda_streaming=$codTiendaStreaming
+                and fecha between '$fechaInicio' and '$fechaFin'";
+    $dataConsulta = getSelect($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
+});
+
+
+
 $app->post('/api/tienda/saveArchivo', function (Request $request, Response $response) {
     $payload = $request->getBody()->__toString();
     $payload =  stripslashes($payload);
@@ -697,6 +738,35 @@ $app->post('/api/tienda/saveArchivo', function (Request $request, Response $resp
         ];
         echo json_encode($data);
     }
+});
+
+$app->delete('/api/tienda/deleteArchivo/{idTransaccion}', function (Request $request, Response $response) {
+    $idTransaccion = $request->getAttribute('idTransaccion');
+    $data = ["bRta" => false];
+    $sql = "DELETE from transaccion where cod_transaccion =:idTransaccion";
+    try {
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->prepare($sql);
+        $resultado->bindParam(':idTransaccion', $idTransaccion);
+        $resultado->execute();
+
+        $data = [
+            "bRta" => true
+        ];
+        $resultado = null;
+        $db = null;
+    } catch (PDOException $e) {
+        $data =  [
+            "bRta" => false,
+            "mSmg" => "Error de conexión: " . $e->getMessage()
+        ];
+        echo json_encode($data);
+    }
+
+    
+
+    echo json_encode($data);
 });
 
 function getSelect(String $sql)
