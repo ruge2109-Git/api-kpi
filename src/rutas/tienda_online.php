@@ -172,13 +172,14 @@ $app->get('/api/tienda/indicadores', function (Request $request, Response $respo
 $app->get('/api/tienda/recargas', function (Request $request, Response $response) {
     $data = ["bRta" => false];
     $sql = "SELECT 
-            cod_tienda_streaming,
+            ts.cod_tienda_streaming,
             usuario_vendedor administrador, 
             usuario_cliente cliente, 
             saldo_adicional valor_recarga, 
-            fecha_transaccion fecha_recarga 
+            fecha_transaccion fecha_recarga ,
+            (select count(*) from transaccion t where t.cod_tienda_streaming = ts.cod_tienda_streaming) tiene_archivos
         from 
-            tienda_streaming 
+            tienda_streaming ts
         where 
             descripcion= 'Recarga directa por el Administrador' or
             descripcion= 'Descuento de mi saldo por recarga a distribuidor' 
@@ -197,6 +198,7 @@ $app->get('/api/tienda/recargasFiltro/{fechaInicio}/{fechaFin}', function (Reque
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
     $sql = "SELECT 
+            cod_tienda_streaming,
             usuario_vendedor administrador, 
             usuario_cliente cliente, 
             saldo_adicional valor_recarga, 
