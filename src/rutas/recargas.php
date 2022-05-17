@@ -75,29 +75,14 @@ $app->post('/api/sales_report/nuevo', function (Request $request, Response $resp
         :usuario,
         :creado_por
     )";
-    // $codlinea = buscarRecargaPorIdTransaccion($id_transaccion);
-    // if ($codlinea["bRta"]) {
-    //     $sql = "UPDATE sales_report set
-    //                 id_cliente = :id_cliente,
-    //                 cliente = :cliente,
-    //                 canal = :canal,
-    //                 operador = :operador,
-    //                 linea = :linea,
-    //                 id_convenio = :id_convenio,
-    //                 nombre_convenio = :nombre_convenio,
-    //                 comision = :comision,
-    //                 fecha = :fecha,
-    //                 hora = :hora,
-    //                 valor = :valor,
-    //                 saldo_final = :saldo_final,
-    //                 bolsa = :bolsa,
-    //                 estado = :estado,
-    //                 usuario = :usuario,
-    //                 creado_por = :creado_por
-    //             WHERE 
-    //                 id_transaccion = :id_transaccion
-    //     ";
-    // }
+    $codlinea = buscarRecargaPorIdTransaccion($id_transaccion,$id_cliente,$canal,$operador,$fecha,$hora,$valor,$saldo_final,$estado);
+    if ($codlinea["bRta"]) {
+        $data = [
+            "bRta" => false
+        ];
+        echo json_encode($data);
+        return;
+    }
     try {
         $db = new db();
         $db = $db->connectDB();
@@ -136,9 +121,19 @@ $app->post('/api/sales_report/nuevo', function (Request $request, Response $resp
     }
 });
 
-function buscarRecargaPorIdTransaccion(String $idTransaccion)
+function buscarRecargaPorIdTransaccion($id_transaccion,$id_cliente,$canal,$operador,$fecha,$hora,$valor,$saldo_final,$estado)
 {
-    $sql = "select * from sales_report where id_transaccion = '$idTransaccion'";
+    $sql = "SELECT * from sales_report where 
+        id_transaccion = '$id_transaccion' and  
+        id_cliente = '$id_cliente' and
+        canal = '$canal' and
+        operador = '$operador' and
+        fecha = '$fecha' and
+        hora = '$hora' and
+        valor = '$valor' and
+        saldo_final = '$saldo_final' and
+        estado = '$estado'    
+    ";
     try {
         $db = new db();
         $db = $db->connectDB();
@@ -428,6 +423,32 @@ $app->get('/api/sales_report/topClienteFechas/{fechaInicio}/{fechaFin}', functio
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
     $sql = "SELECT id_cliente,cliente,fecha,count(*) cantidad,sum(valor) valor from sales_report where fecha between '$fechaInicio' and '$fechaFin' group by canal,fecha order by count(*) desc";
+
+    $dataConsulta = getSelectSR($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
+$app->get('/api/sales_report/topComision', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
+    $sql = "SELECT * from sales_report order by comision desc";
+
+    $dataConsulta = getSelectSR($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
+$app->get('/api/sales_report/topComisionFechas/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $sql = "SELECT * from sales_report where fecha between '$fechaInicio' and '$fechaFin' order by comision desc";
 
     $dataConsulta = getSelectSR($sql);
     if ($dataConsulta['bRta']) {

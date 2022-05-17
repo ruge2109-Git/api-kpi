@@ -16,6 +16,7 @@ $app->get('/',function(Request $request,Response $response){
 require '../src/rutas/productos.php';
 require '../src/rutas/tienda_online.php';
 require '../src/rutas/recargas.php';
+require '../src/rutas/informe_repartos.php';
 
 
 $app->add(function ($req, $res, $next) {
