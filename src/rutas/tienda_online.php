@@ -162,6 +162,8 @@ $app->get('/api/tienda/indicadores', function (Request $request, Response $respo
     if ($dataVenta['bRta']) {
         $data['data'][] = $dataVenta['data'][0];
     }
+
+
     if (isset($data['data'])) {
         $data['bRta'] = true;
     }
@@ -202,9 +204,10 @@ $app->get('/api/tienda/recargasFiltro/{fechaInicio}/{fechaFin}', function (Reque
             usuario_vendedor administrador, 
             usuario_cliente cliente, 
             saldo_adicional valor_recarga, 
-            fecha_transaccion fecha_recarga 
+            fecha_transaccion fecha_recarga ,
+			(select count(*) from transaccion t where t.cod_tienda_streaming = ts.cod_tienda_streaming) tiene_archivos
         from 
-            tienda_streaming 
+            tienda_streaming ts
         where 
             descripcion= 'Recarga directa por el Administrador' and
             fecha_transaccion between '$fechaInicio' and '$fechaFin'

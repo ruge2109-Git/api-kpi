@@ -164,6 +164,48 @@ function buscarRecargaPorIdTransaccion($id_transaccion,$id_cliente,$canal,$opera
 
 //Reportes
 
+$app->get('/api/sales_report/indicadores', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
+    $sql = "SELECT 
+            fecha,
+            sum(valor) total,
+            avg(valor) promedio
+        from 
+            sales_report
+        group by  
+            fecha";
+
+    $dataConsulta = getSelectSR($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
+$app->get('/api/sales_report/indicadoresFecha/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $sql = "SELECT 
+            fecha,
+            sum(valor) total,
+            avg(valor) promedio
+        from 
+            sales_report
+        where
+            fecha between '$fechaInicio' and '$fechaFin' 
+        group by  
+            fecha";
+
+    $dataConsulta = getSelectSR($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
 $app->get('/api/sales_report/clientesCanal', function (Request $request, Response $response) {
     $data = ["bRta" => false];
     $sql = "SELECT

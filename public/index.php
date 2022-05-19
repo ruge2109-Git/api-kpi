@@ -17,6 +17,8 @@ require '../src/rutas/productos.php';
 require '../src/rutas/tienda_online.php';
 require '../src/rutas/recargas.php';
 require '../src/rutas/informe_repartos.php';
+require '../src/rutas/extracto_cta_ahorro.php';
+require '../src/rutas/extracto_recarga.php';
 
 
 $app->add(function ($req, $res, $next) {
