@@ -183,8 +183,7 @@ $app->get('/api/tienda/recargas', function (Request $request, Response $response
         from 
             tienda_streaming ts
         where 
-            descripcion= 'Recarga directa por el Administrador' or
-            descripcion= 'Descuento de mi saldo por recarga a distribuidor' 
+            descripcion= 'Recarga directa por el Administrador' 
         order by saldo_adicional desc, fecha_recarga desc
     ";
     $dataConsulta = getSelect($sql);
@@ -210,6 +209,55 @@ $app->get('/api/tienda/recargasFiltro/{fechaInicio}/{fechaFin}', function (Reque
             tienda_streaming ts
         where 
             descripcion= 'Recarga directa por el Administrador' and
+            fecha_transaccion between '$fechaInicio' and '$fechaFin'
+        order by saldo_adicional desc, fecha_recarga desc
+    ";
+    $dataConsulta = getSelect($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
+$app->get('/api/tienda/recargasClientes', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
+    $sql = "SELECT 
+            ts.cod_tienda_streaming,
+            usuario_vendedor administrador, 
+            usuario_cliente cliente, 
+            saldo_adicional valor_recarga, 
+            fecha_transaccion fecha_recarga ,
+            (select count(*) from transaccion t where t.cod_tienda_streaming = ts.cod_tienda_streaming) tiene_archivos
+        from 
+            tienda_streaming ts
+        where 
+            descripcion= 'Descuento de mi saldo por recarga a distribuidor' 
+        order by saldo_adicional desc, fecha_recarga desc
+    ";
+    $dataConsulta = getSelect($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+    echo json_encode($data);
+});
+
+$app->get('/api/tienda/recargasClientesFiltro/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $data = ["bRta" => false];
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $sql = "SELECT 
+            cod_tienda_streaming,
+            usuario_vendedor administrador, 
+            usuario_cliente cliente, 
+            saldo_adicional valor_recarga, 
+            fecha_transaccion fecha_recarga ,
+			(select count(*) from transaccion t where t.cod_tienda_streaming = ts.cod_tienda_streaming) tiene_archivos
+        from 
+            tienda_streaming ts
+        where 
+            descripcion= 'Descuento de mi saldo por recarga a distribuidor' and
             fecha_transaccion between '$fechaInicio' and '$fechaFin'
         order by saldo_adicional desc, fecha_recarga desc
     ";

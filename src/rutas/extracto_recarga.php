@@ -175,16 +175,19 @@ function buscarExtractoRecargaPorTodoConcepto($fecha, $hora, $descripcion, $serv
 
 $app->get('/api/extractoRecarga/indicadoresGenerales', function (Request $request, Response $response) {
     $data = ["bRta" => false];
-    $sql = "SELECT 
-            ext.fecha,
-            sum(ext.valor) valor_compra,
-            sum(repartos.valor) valor_reparto,
-            sum(abs(ext.valor) - abs(repartos.valor)) comision
-        from
-            (select * from extracto_recarga where descripcion='Compra') ext
-            inner join (select * from extracto_recarga where descripcion='Reparto') repartos on (
-                repartos.hora = ext.hora
-            )
+    $sql = "select
+				ext.fecha,
+				sum(ext.valor) valor_compra,
+				sum(repartos.valor) valor_reparto,
+				round(abs(sum(ext.valor)) - abs(sum(repartos.valor)),2) comision
+			from
+				extracto_recarga ext
+				inner join (select ext2.fecha,ext2.hora,ext2.valor from extracto_recarga ext2 where ext2.descripcion ='Reparto') repartos on (
+					repartos.fecha = ext.fecha and
+					repartos.hora = ext.hora
+				)
+			where
+	ext.descripcion = 'Compra'
         group by ext.fecha";
 
     $dataConsulta = getSelectEXCT($sql);
@@ -199,17 +202,19 @@ $app->get('/api/extractoRecarga/indicadoresGeneralesFecha/{fechaInicio}/{fechaFi
     $data = ["bRta" => false];
     $fechaInicio = $request->getAttribute('fechaInicio');
     $fechaFin = $request->getAttribute('fechaFin');
-    $sql = "SELECT 
-            ext.fecha,
-            sum(ext.valor) valor_compra,
-            sum(repartos.valor) valor_reparto,
-            sum(abs(ext.valor) - abs(repartos.valor)) comision
-        from
-            (select * from extracto_recarga where descripcion='Compra') ext
-            inner join (select * from extracto_recarga where descripcion='Reparto') repartos on (
-                repartos.hora = ext.hora
-            )
-        where
+    $sql = "select
+				ext.fecha,
+				sum(ext.valor) valor_compra,
+				sum(repartos.valor) valor_reparto,
+				round(abs(sum(ext.valor)) - abs(sum(repartos.valor)),2) comision
+			from
+				extracto_recarga ext
+				inner join (select ext2.fecha,ext2.hora,ext2.valor from extracto_recarga ext2 where ext2.descripcion ='Reparto') repartos on (
+					repartos.fecha = ext.fecha and
+					repartos.hora = ext.hora
+				)
+			where
+				ext.descripcion = 'Compra' and
             ext.fecha between '$fechaInicio' and '$fechaFin'
         group by ext.fecha";
 

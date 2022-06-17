@@ -19,6 +19,8 @@ require '../src/rutas/recargas.php';
 require '../src/rutas/informe_repartos.php';
 require '../src/rutas/extracto_cta_ahorro.php';
 require '../src/rutas/extracto_recarga.php';
+require '../src/rutas/mi-entretenimiento.php';
+require '../src/rutas/recargas_jv.php';
 
 
 $app->add(function ($req, $res, $next) {
