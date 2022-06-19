@@ -347,7 +347,6 @@ $app->post('/api/recargasJV/nuevaGanancia', function (Request $request, Response
 });
 
 
-
 $app->get('/api/recargasJV/saldos', function (Request $request, Response $response) {
     $sql = "select * from jv_consumido_saldo";
     try {
@@ -690,6 +689,184 @@ $app->post('/api/recargasJV/nuevoSaldo', function (Request $request, Response $r
     }
 });
 
+
+$app->get('/api/recargasJV/recargas', function (Request $request, Response $response) {
+    $sql = "select * from jv_consumido_recargas";
+    try {
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if ($resultado->rowCount() == 0) {
+            $data = ["bRta" => false];
+            echo json_encode($data);
+            $resultado = null;
+            $db = null;
+            return;
+        }
+        $data = [
+            "bRta" => true,
+            "data" => $resultado->fetchAll(PDO::FETCH_OBJ)
+        ];
+        $resultado = null;
+        $db = null;
+        echo json_encode($data);
+    } catch (PDOException $e) {
+        $data =  [
+            "bRta" => false,
+            "mSmg" => "Error de conexión"
+        ];
+        echo json_encode($data);
+    }
+});
+
+$app->get('/api/recargasJV/recargasFecha/{fechaInicio}/{fechaFin}', function (Request $request, Response $response) {
+    $fechaInicio = $request->getAttribute('fechaInicio');
+    $fechaFin = $request->getAttribute('fechaFin');
+    $data = ["bRta" => false];
+    $sql = "SELECT * from jv_consumido_recargas where fecha_cargue between '$fechaInicio' and '$fechaFin'";
+
+    $dataConsulta = getSelect($sql);
+    if ($dataConsulta['bRta']) {
+        $data['bRta'] = true;
+        $data['data'] = $dataConsulta['data'];
+    }
+
+    echo json_encode($data);
+});
+
+$app->post('/api/recargasJV/nuevaRecarga', function (Request $request, Response $response) {
+
+    $payload = $request->getBody()->__toString();
+    $payload =  stripslashes($payload);
+    $data = json_decode($payload, true);
+
+    $fecha_cargue = $data["fecha_cargue"];
+    $nombre = $data["nombre"];
+    $codigo_cliente = $data["codigo_cliente"];
+    $cc = $data["cc"];
+    $perfil = $data["perfil"];
+    $comision = $data["comision"];
+    $ayudas_a_familias = $data["ayudas_a_familias"];
+    $claro = $data["claro"];
+    $paquetes_claro = $data["paquetes_claro"];
+    $paquetes_movistar = $data["paquetes_movistar"];
+    $movistar = $data["movistar"];
+    $paquetes_tigo = $data["paquetes_tigo"];
+    $tigo = $data["tigo"];
+    $avantel = $data["avantel"];
+    $paquetes_avantel = $data["paquetes_avantel"];
+    $virgin = $data["virgin"];
+    $paquetes_virgin = $data["paquetes_virgin"];
+    $paquete_etb = $data["paquete_etb"];
+    $etb = $data["etb"];
+    $exito = $data["exito"];
+    $paquetes_exito = $data["paquetes_exito"];
+    $paquetes_conectame = $data["paquetes_conectame"];
+    $conectame = $data["conectame"];
+    $sipmobile = $data["sipmobile"];
+    $flashmobile = $data["flashmobile"];
+    $directv = $data["directv"];
+    $iyo_movil = $data["iyo_movil"];
+    $comunicamos = $data["comunicamos"];
+    $wom = $data["wom"];
+    $paquetes_wom = $data["paquetes_wom"];
+    $kalley_mobile = $data["kalley_mobile"];
+    $paquetes_kalley = $data["paquetes_kalley"];
+    $total = $data["total"];
+
+    $sql = "INSERT INTO jv_consumido_recargas (fecha_cargue,nombre,codigo_cliente,cc,perfil,comision,ayudas_a_familias,claro,paquetes_claro,paquetes_movistar,movistar,paquetes_tigo,tigo,avantel,paquetes_avantel,virgin,paquetes_virgin,paquete_etb,etb,exito,paquetes_exito,paquetes_conectame,conectame,sipmobile,flashmobile,directv,iyo_movil,comunicamos,wom,paquetes_wom,kalley_mobile,paquetes_kalley,total) VALUES(
+        :fecha_cargue,
+        :nombre,
+        :codigo_cliente,
+        :cc,
+        :perfil,
+        :comision,
+        :ayudas_a_familias,
+        :claro,
+        :paquetes_claro,
+        :paquetes_movistar,
+        :movistar,
+        :paquetes_tigo,
+        :tigo,
+        :avantel,
+        :paquetes_avantel,
+        :virgin,
+        :paquetes_virgin,
+        :paquete_etb,
+        :etb,
+        :exito,
+        :paquetes_exito,
+        :paquetes_conectame,
+        :conectame,
+        :sipmobile,
+        :flashmobile,
+        :directv,
+        :iyo_movil,
+        :comunicamos,
+        :wom,
+        :paquetes_wom,
+        :kalley_mobile,
+        :paquetes_kalley,
+        :total
+        )";
+
+    try {
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->prepare($sql);
+        $resultado->bindParam(':nombre', $nombre);
+        $resultado->bindParam(':fecha_cargue',$fecha_cargue);
+        $resultado->bindParam(':nombre',$nombre);
+        $resultado->bindParam(':codigo_cliente',$codigo_cliente);
+        $resultado->bindParam(':cc',$cc);
+        $resultado->bindParam(':perfil',$perfil);
+        $resultado->bindParam(':comision',$comision);
+        $resultado->bindParam(':ayudas_a_familias',$ayudas_a_familias);
+        $resultado->bindParam(':claro',$claro);
+        $resultado->bindParam(':paquetes_claro',$paquetes_claro);
+        $resultado->bindParam(':paquetes_movistar',$paquetes_movistar);
+        $resultado->bindParam(':movistar',$movistar);
+        $resultado->bindParam(':paquetes_tigo',$paquetes_tigo);
+        $resultado->bindParam(':tigo',$tigo);
+        $resultado->bindParam(':avantel',$avantel);
+        $resultado->bindParam(':paquetes_avantel',$paquetes_avantel);
+        $resultado->bindParam(':virgin',$virgin);
+        $resultado->bindParam(':paquetes_virgin',$paquetes_virgin);
+        $resultado->bindParam(':paquete_etb',$paquete_etb);
+        $resultado->bindParam(':etb',$etb);
+        $resultado->bindParam(':exito',$exito);
+        $resultado->bindParam(':paquetes_exito',$paquetes_exito);
+        $resultado->bindParam(':paquetes_conectame',$paquetes_conectame);
+        $resultado->bindParam(':conectame',$conectame);
+        $resultado->bindParam(':sipmobile',$sipmobile);
+        $resultado->bindParam(':flashmobile',$flashmobile);
+        $resultado->bindParam(':directv',$directv);
+        $resultado->bindParam(':iyo_movil',$iyo_movil);
+        $resultado->bindParam(':comunicamos',$comunicamos);
+        $resultado->bindParam(':wom',$wom);
+        $resultado->bindParam(':paquetes_wom',$paquetes_wom);
+        $resultado->bindParam(':kalley_mobile',$kalley_mobile);
+        $resultado->bindParam(':paquetes_kalley',$paquetes_kalley);
+        $resultado->bindParam(':total',$total);
+
+        $resultado->execute();
+
+        $data = [
+            "bRta" => true
+        ];
+        $resultado = null;
+        $db = null;
+        echo json_encode($data);
+    } catch (PDOException $e) {
+        $data =  [
+            "bRta" => false,
+            "mSmg" => "Error de conexión: " . $e->getMessage()
+        ];
+        echo json_encode($data);
+    }
+});
+
+
 $app->get('/api/recargasJV/indicadores', function (Request $request, Response $response) {
 
     $data = ["bRta" => false];
@@ -697,10 +874,11 @@ $app->get('/api/recargasJV/indicadores', function (Request $request, Response $r
                 ganancias.fecha_cargue,
                 sum(ganancias.total) ganancias, 
                 sum(saldos.total) saldos,
-                0 recargas
+                sum(recargas.total) recargas
             from 
                 jv_consumido_ganancias ganancias
                 inner join jv_consumido_saldo saldos on (saldos.fecha_cargue = ganancias.fecha_cargue and saldos.codigo_cliente = ganancias.codigo_cliente)
+                inner join jv_consumido_recargas recargas on (recargas.fecha_cargue = ganancias.fecha_cargue and recargas.codigo_cliente = ganancias.codigo_cliente)
             group by 
                 ganancias.fecha_cargue
             order by ganancias.fecha_cargue desc";
@@ -722,10 +900,11 @@ $app->get('/api/recargasJV/indicadoresFecha/{fechaInicio}/{fechaFin}', function 
                 ganancias.fecha_cargue,
                 sum(ganancias.total) ganancias, 
                 sum(saldos.total) saldos,
-                0 recargas
+                sum(recargas.total) recargas
             from 
                 jv_consumido_ganancias ganancias
                 inner join jv_consumido_saldo saldos on (saldos.fecha_cargue = ganancias.fecha_cargue and saldos.codigo_cliente = ganancias.codigo_cliente)
+                inner join jv_consumido_recargas recargas on (recargas.fecha_cargue = ganancias.fecha_cargue and recargas.codigo_cliente = ganancias.codigo_cliente)
             where
 	            ganancias.fecha_cargue between '$fechaInicio' and '$fechaFin'
             group by 
